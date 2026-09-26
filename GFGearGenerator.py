@@ -40,14 +40,14 @@ def parameters(m,z,ap,ah,anchoeng,bool,X,fastcompute, normal_system=False, backl
     rp=dp/2
     db=dp*mt.cos(apt)
     rb=db/2
-    da=dp+2*m
+    da=dp+2*(m - clearance)
     ra=da/2
     df=dp - 2*(m + clearance)
     rf=df/2
     T = (mt.pi * modt / 2) - backlash
     vm=X*m
     dv=dp+2*X*m
-    dva=dv+2*m
+    dva=dv+2*(m - clearance)
     dvf=dv - 2*(m + clearance)
     rv=dv/2
     rva=dva/2
@@ -1024,8 +1024,8 @@ def rowbodymove(numerodecomponentes,radioext):
         movefeats.add(movefeatureInput)
 #Mueve la cantidad de cuerpos (los últimos creados) especificados como conjunto en la dirección especificada
 
-def planetgearsdr(m1,zp1,ap1,aok,anchoeng,newComp,backlash=0.0):
-    list3=parameters(m1,zp1,ap1,0,anchoeng,False,0,aok,backlash=backlash)
+def planetgearsdr(m1,zp1,ap1,aok,anchoeng,newComp,backlash=0.0,clearance=0.0):
+    list3=parameters(m1,zp1,ap1,0,anchoeng,False,0,aok,backlash=backlash,clearance=clearance)
     rf=list3[0]
     x=list3[1]
     y=list3[2]
@@ -1040,8 +1040,8 @@ def planetgearsdr(m1,zp1,ap1,aok,anchoeng,newComp,backlash=0.0):
     cpattern(1,False,ra,rf,zp1,diente[0],True,anchoeng,newComp, 'Join')
     combine(zp1,newComp)
 
-def coronastd(aaok,z,m,ap,anchoeng,espesorc,newComp,backlash=0.0):
-    list3 = parameters(m, z, ap, 0, anchoeng, False, 0, aaok,backlash=backlash)
+def coronastd(aaok,z,m,ap,anchoeng,espesorc,newComp,backlash=0.0,clearance=0.0):
+    list3 = parameters(m, z, ap, 0, anchoeng, False, 0, aaok,backlash=-backlash,clearance=-clearance)
     rf = list3[0]
     x = list3[1]
     y = list3[2]
@@ -1057,12 +1057,12 @@ def coronastd(aaok,z,m,ap,anchoeng,espesorc,newComp,backlash=0.0):
 
 
 
-def coronasnostd(aaok,z,m,anchoeng,ap,espesorc,newComp,occ,backlash=0.0):
+def coronasnostd(aaok,z,m,anchoeng,ap,espesorc,newComp,occ,backlash=0.0,clearance=0.0):
     app = adsk.core.Application.get()
     ui = app.userInterface
     design = app.activeProduct
     rootComp = newComp
-    list3 = parameters(m, z, ap, 0, anchoeng, False, 0, aaok,backlash=backlash)
+    list3 = parameters(m, z, ap, 0, anchoeng, False, 0, aaok,backlash=backlash,clearance=-clearance)
     rf = list3[0]
     x = list3[1]
     y = list3[2]
@@ -1122,7 +1122,7 @@ def helicalgs(aaok,cw,dh,z,anchoeng,m,ap,ah,newComp, helicalSystem,backlash=0.0,
         if ui:
             ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
-def coronashelstdr(aaok, cw, dh, z, anchoeng, m, ap, espesorc, ah, newComp, helicalSystem,backlash=0.0):
+def coronashelstdr(aaok, cw, dh, z, anchoeng, m, ap, espesorc, ah, newComp, helicalSystem,backlash=0.0,clearance=0.0):
     app = adsk.core.Application.get()
     ui = app.userInterface
     design = app.activeProduct
@@ -1130,7 +1130,7 @@ def coronashelstdr(aaok, cw, dh, z, anchoeng, m, ap, espesorc, ah, newComp, heli
     mult1 = 1
     if dh == True:
         mult1 = 2
-    list3 = parameters(m, z, ap, ah, 1.25 * anchoeng, cw, 0, aaok, helicalSystem,backlash=backlash)
+    list3 = parameters(m, z, ap, ah, 1.25 * anchoeng, cw, 0, aaok, helicalSystem,backlash=-backlash,clearance=-clearance)
     rf = list3[0]
     x = list3[1]
     y = list3[2]
@@ -1164,7 +1164,7 @@ def coronashelnostdr(aaok,cw,dh,z,anchoeng,m,ap,espesorc,ah, newComp, occ, helic
     mult1 = 1
     if dh == True:
         mult1 = 2
-    list3 = parameters(m, z, ap, ah, 1.25 * anchoeng, cw, 0, aaok, helicalSystem,backlash=backlash,clearance=clearance)
+    list3 = parameters(m, z, ap, ah, 1.25 * anchoeng, cw, 0, aaok, helicalSystem,backlash=backlash,clearance=-clearance)
     rf = list3[0]
     x = list3[1]
     y = list3[2]
@@ -2458,9 +2458,9 @@ class cmdDefPlanetaryPressedEventHandler(adsk.core.CommandCreatedEventHandler):
         pitch = inputs.addValueInput('Pitch', 'Pitch [in]', 'in', adsk.core.ValueInput.createByReal(get(self, 'Pitch', 23.460456)))
         pitch.isVisible = False
         
-        inputs.addIntegerSpinnerCommandInput('Z_Sun', 'Sun Teeth [ ]', 6, 250, 1, get(self, 'Z_Sun', 24))
-        inputs.addIntegerSpinnerCommandInput('Z_Planet', 'Planet Teeth [ ]', 6, 250, 1, get(self, 'Z_Planet', 12))
-        inputs.addIntegerSpinnerCommandInput('Z_Ring', 'Ring Teeth [ ]', 6, 500, 1, get(self, 'Z_Ring', 48))
+        inputs.addIntegerSpinnerCommandInput('Z_Sun', 'Sun Teeth', 6, 250, 1, get(self, 'Z_Sun', 20))
+        inputs.addIntegerSpinnerCommandInput('Z_Planet', 'Planet Teeth', 6, 250, 1, get(self, 'Z_Planet', 10))
+        inputs.addIntegerSpinnerCommandInput('Z_Ring', 'Ring Teeth', 6, 500, 1, get(self, 'Z_Ring', 40))
         inputs.addIntegerSpinnerCommandInput('PlanetCount', 'Number of Planets [ ]', 1, 20, 1, get(self, 'PlanetCount', 3))
 
         inputs.addValueInput('GearHeight_mm', 'Gear height [mm]', 'mm', adsk.core.ValueInput.createByReal(get(self, 'GearHeight_mm', 1.0)))
@@ -2474,8 +2474,8 @@ class cmdDefPlanetaryPressedEventHandler(adsk.core.CommandCreatedEventHandler):
         inRadialThickness = inputs.addValueInput('RadialThickness_in','Ring Radial thickness [in]','in', adsk.core.ValueInput.createByReal(get(self, 'RadialThickness_in', 0.2)))
         inRadialThickness.isVisible = False
         
-        inputs.addValueInput('Clearance_mm', 'Clearance [mm]', 'mm', adsk.core.ValueInput.createByReal(get(self, 'Clearance_mm', 0.02)))
-        inClearance = inputs.addValueInput('Clearance_in', 'Clearance [in]', 'in', adsk.core.ValueInput.createByReal(get(self, 'Clearance_in', default=0.008)))
+        inputs.addValueInput('Clearance_mm', 'Clearance [mm]', 'mm', adsk.core.ValueInput.createByReal(get(self, 'Clearance_mm', 0.01)))
+        inClearance = inputs.addValueInput('Clearance_in', 'Clearance [in]', 'in', adsk.core.ValueInput.createByReal(get(self, 'Clearance_in', default=0.004)))
         inClearance.isVisible = False
 
         onInputChanged = ExternalGear_ChangedHandler()
@@ -2574,14 +2574,14 @@ class cmdDef2OKButtonPressedEventHandler(adsk.core.CommandEventHandler):
                 anchoeng=inputs2.itemById('GearHeight_mm').value
                 espesorc=inputs2.itemById('RadialThickness_mm').value*10
                 textthickness = inputs2.itemById('RadialThickness_mm').expression
-                backlash_val = inputs2.itemById('Backlash_mm').value
+                backlash_val = inputs2.itemById('Backlash_mm').value*10
             elif standard == 'English':
                 m=25.4/(inputs2.itemById('Pitch').value/2.54)
                 textmodule = "p= "+ inputs2.itemById('Pitch').expression
                 anchoeng=inputs2.itemById('GearHeight_in').value
                 espesorc=inputs2.itemById('RadialThickness_in').value*10
                 textthickness = inputs2.itemById('RadialThickness_in').expression
-                backlash_val = inputs2.itemById('Backlash_in').value
+                backlash_val = inputs2.itemById('Backlash_in').value*10
 
             ap=inputs2.itemById('PressureAngle').value
         
@@ -2626,14 +2626,14 @@ class cmdDef3OKButtonPressedEventHandler(adsk.core.CommandEventHandler):
                 anchoeng=inputs2.itemById('GearHeight_mm').value
                 espesorc=inputs2.itemById('RadialThickness_mm').value*10
                 textthickness = inputs2.itemById('RadialThickness_mm').expression
-                backlash_val = inputs2.itemById('Backlash_mm').value
+                backlash_val = inputs2.itemById('Backlash_mm').value*10
             elif standard == 'English':
                 m=25.4/(inputs2.itemById('Pitch').value/2.54)
                 textmodule = "p= "+ inputs2.itemById('Pitch').expression
                 anchoeng=inputs2.itemById('GearHeight_in').value
                 espesorc=inputs2.itemById('RadialThickness_in').value*10
                 textthickness = inputs2.itemById('RadialThickness_in').expression
-                backlash_val = inputs2.itemById('Backlash_in').value
+                backlash_val = inputs2.itemById('Backlash_in').value*10
 
             ap=inputs2.itemById('PressureAngle').value
             hb=hidebodies(newComp)
@@ -2679,12 +2679,12 @@ class cmdDef4OKButtonPressedEventHandler(adsk.core.CommandEventHandler):
                 m=inputs2.itemById('Module').value*10
                 textmodule = "m= "+ inputs2.itemById('Module').expression
                 anchoeng=inputs2.itemById('GearHeight_mm').value/mult1
-                backlash_val = inputs2.itemById('Backlash_mm').value
+                backlash_val = inputs2.itemById('Backlash_mm').value*10
             elif standard == 'English':
                 m=25.4/(inputs2.itemById('Pitch').value/2.54)
                 textmodule = "p= "+ inputs2.itemById('Pitch').expression
                 anchoeng=inputs2.itemById('GearHeight_in').value/mult1
-                backlash_val = inputs2.itemById('Backlash_in').value
+                backlash_val = inputs2.itemById('Backlash_in').value*10
             
             ap=inputs2.itemById('PressureAngle').value
             ah=inputs2.itemById('HelixAngle').value
@@ -2742,14 +2742,14 @@ class cmdDef5OKButtonPressedEventHandler(adsk.core.CommandEventHandler):
             anchoeng=inputs2.itemById('GearHeight_mm').value/mult1
             espesorc=inputs2.itemById('RadialThickness_mm').value*10
             textthickness = inputs2.itemById('RadialThickness_mm').expression
-            backlash_val = inputs2.itemById('Backlash_mm').value
+            backlash_val = inputs2.itemById('Backlash_mm').value*10
         elif standard == 'English':
             m=25.4/(inputs2.itemById('Pitch').value/2.54)
             textmodule = "p= "+ inputs2.itemById('Pitch').expression
             anchoeng=inputs2.itemById('GearHeight_in').value/mult1
             espesorc=inputs2.itemById('RadialThickness_in').value*10
             textthickness = inputs2.itemById('RadialThickness_in').expression
-            backlash_val = inputs2.itemById('Backlash_in').value
+            backlash_val = inputs2.itemById('Backlash_in').value*10
 
         ap=inputs2.itemById('PressureAngle').value
         ah=inputs2.itemById('HelixAngle').value
@@ -2812,7 +2812,7 @@ class cmdDef6OKButtonPressedEventHandler(adsk.core.CommandEventHandler):
                 # Text expressions
                 textmodule = "m= "+ inputs2.itemById('Module').expression
                 textthickness = inputs2.itemById('RadialThickness_mm').expression
-                backlash_val = inputs2.itemById('Backlash_mm').value
+                backlash_val = inputs2.itemById('Backlash_mm').value*10
             elif standard == 'English':
                 m=25.4/(inputs2.itemById('Pitch').value/2.54)
                 anchoeng=inputs2.itemById('GearHeight_in').value/mult1
@@ -2821,13 +2821,13 @@ class cmdDef6OKButtonPressedEventHandler(adsk.core.CommandEventHandler):
                 # Text expressions
                 textmodule = "p= "+ inputs2.itemById('Pitch').expression
                 textthickness = inputs2.itemById('RadialThickness_in').expression
-                backlash_val = inputs2.itemById('Backlash_in').value
+                backlash_val = inputs2.itemById('Backlash_in').value*10
 
             ap=inputs2.itemById('PressureAngle').value
             ah=inputs2.itemById('HelixAngle').value
             hb=hidebodies(newComp)
             try:
-                coronashelstdr(aaok,vul,vul2,z,anchoeng,m,ap,espesorc,ah, newComp, helicalSystem)
+                coronashelstdr(aaok,vul,vul2,z,anchoeng,m,ap,espesorc,ah, newComp, helicalSystem, backlash=backlash_val)
                 #numerop simple=5
                 #numerop doble=8
                 if vul2 == True:
@@ -2877,7 +2877,7 @@ class cmdDef7OKButtonPressedEventHandler(adsk.core.CommandEventHandler):
 
             # Text expressions
             textmodule = "m= "+ inputs2.itemById('Module').expression
-            backlash_val = inputs2.itemById('Backlash_mm').value
+            backlash_val = inputs2.itemById('Backlash_mm').value*10
 
         elif standard == 'English':
             m=25.4/(inputs2.itemById('Pitch').value/2.54)
@@ -2887,7 +2887,7 @@ class cmdDef7OKButtonPressedEventHandler(adsk.core.CommandEventHandler):
 
             # Text expressions
             textmodule = "p= "+ inputs2.itemById('Pitch').expression
-            backlash_val = inputs2.itemById('Backlash_in').value
+            backlash_val = inputs2.itemById('Backlash_in').value*10
         
         ap = inputs2.itemById('PressureAngle').value
         ah = inputs2.itemById('HelixAngle').value
@@ -3444,13 +3444,16 @@ class cmdDefPlanetaryOKButtonPressedEventHandler(adsk.core.CommandEventHandler):
                 clearance_val = inputs2.itemById('Clearance_in').value * 10
 
             ap = inputs2.itemById('PressureAngle').value
-            backlash_val = 2 * clearance_val * math.tan(ap)
+            backlash_val = clearance_val * 0.75
+            if ap > 0:
+                backlash_val = backlash_val / math.cos(ap)
 
-            if ui and clearance_val > m:
+            if ui and clearance_val > (m * 0.4):
                 res = ui.messageBox(
-                    f'A clearance value higher than the module ({m:.2f}) can cause tooth geometry to fail.\n\n'
-                    f'Do you want to continue anyway?',
-                    'High Clearance Warning',
+                    f'A 3D print clearance of ({clearance_val:.2f} mm) is huge for a module of ({m:.2f} mm).\n\n'
+                    f'The teeth will be heavily thinned to fit, and height truncation will be capped to prevent geometry failure.\n'
+                    f'Do you want to continue?',
+                    'Extreme Clearance Warning',
                     adsk.core.MessageBoxButtonTypes.OKCancelButtonType
                 )
                 if res == adsk.core.DialogResults.DialogCancel:
@@ -3484,8 +3487,20 @@ class cmdDefPlanetaryOKButtonPressedEventHandler(adsk.core.CommandEventHandler):
             comp_ring.name = f"Ring Gear (Z{zr})"
             hb_ring = hidebodies(comp_ring) if 'hidebodies' in globals() else []
             comp_ring.isConstructionFolderLightBulbOn = False
-            coronashelnostdr(aaok, vul_planet, vul2, zr, anchoeng, m, ap, espesorc, ah, comp_ring, occ_ring, helicalSystem, backlash=backlash_val, clearance=clearance_val)
+            #coronashelnostdr(aaok, vul_planet, vul2, zr, anchoeng, m, ap, espesorc, ah, comp_ring, occ_ring, helicalSystem, backlash=backlash_val, clearance=clearance_val)
+            coronashelstdr(aaok,vul_planet,vul2,zr,anchoeng,m,ap,espesorc,ah, comp_ring, helicalSystem, backlash=backlash_val, clearance=clearance_val)
             if 'showhiddenbodies' in globals(): showhiddenbodies(hb_ring, comp_ring)
+
+            ring_phase = math.pi / zr if zp % 2 == 0 else 0.0
+            
+            if ring_phase != 0.0:
+                ring_mat = adsk.core.Matrix3D.create()
+                ring_mat.setToRotation(
+                    ring_phase,
+                    adsk.core.Vector3D.create(0, 0, 1),
+                    adsk.core.Point3D.create(0, 0, 0)
+                )
+                occ_ring.transform2 = ring_mat
 
             # -----------------------------------------------------------------
             # 8. PLANET GEAR (Created directly under rootComponent)
@@ -3495,7 +3510,7 @@ class cmdDefPlanetaryOKButtonPressedEventHandler(adsk.core.CommandEventHandler):
             comp_planet.name = f"Planet Gear (Z{zp})"
             hb_planet = hidebodies(comp_planet) if 'hidebodies' in globals() else []
             comp_planet.isConstructionFolderLightBulbOn = False
-            helicalgs(aaok, vul_planet, vul2, zp, anchoeng, m, ap, ah, comp_planet, helicalSystem, backlash=backlash_val, clearance=clearance_val)
+            helicalgs(aaok, vul_planet, vul2, zp, anchoeng, m, ap, ah, comp_planet, helicalSystem, backlash=backlash_val, clearance=clearance_val*0.2)
             if 'showhiddenbodies' in globals(): showhiddenbodies(hb_planet, comp_planet)
 
             # -----------------------------------------------------------------
